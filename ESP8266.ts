@@ -85,8 +85,7 @@ namespace ESP8266_IoT {
         sendAT("AT+RST", 1000) // rest
         serial.readString()
         sendAT("AT+CWMODE=1", 500) // set to STA mode
-        sendAT("AT+SYSTIMESTAMP=1634953609130", 100) // Set local timestamp.
-        sendAT(`AT+CIPSNTPCFG=1,8,"ntp1.aliyun.com","0.pool.ntp.org","time.google.com"`, 100)
+        sendAT("AT+RST", 1000) // rest
     }
 
     /**
@@ -98,7 +97,7 @@ namespace ESP8266_IoT {
     //% ssid.defl=your_ssid
     //% pw.defl=your_password weight=100
     export function initWIFI(tx: SerialPin, rx: SerialPin, baudrate: BaudRate) {
-        serial.redirect(tx, rx, BaudRate.BaudRate115200)
+        serial.redirect(tx, rx, baudrate)
         basic.pause(100)
         serial.setTxBufferSize(128)
         serial.setRxBufferSize(128)
@@ -113,12 +112,9 @@ namespace ESP8266_IoT {
     //% pw.defl=your_pwd weight=95
     export function connectWifi(ssid: string, pw: string) {
         currentCmd = Cmd.ConnectWifi
-        sendAT(`AT+CWJAP="${ssid}","${pw}"`) // connect to Wifi router
-        control.waitForEvent(EspEventSource, EspEventValue.ConnectWifi)
+        sendAT(`AT+CWJAP="${ssid}","${pw}"`, 1000) // connect to Wifi router
         while (!wifi_connected) {
-            restEsp8266()
-            sendAT(`AT+CWJAP="${ssid}","${pw}"`)
-            control.waitForEvent(EspEventSource, EspEventValue.ConnectWifi)
+            sendAT(`AT+CWJAP="${ssid}","${pw}"`, 1000)
         }
     }
 
