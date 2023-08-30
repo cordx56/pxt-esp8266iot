@@ -9,6 +9,7 @@ namespace ESP8266_IoT {
         UploadKidsIot,
         DisconnectKidsIot,
         ConnectMqtt,
+        ChangeMode,
     }
 
     export enum KidsIotSwitchState {
@@ -74,19 +75,22 @@ namespace ESP8266_IoT {
 
     let TStoSendStr = ""
 
+    let isBusy = false
+
     // write AT command with CR+LF ending
     function sendAT(command: string, wait: number = 0) {
         serial.writeString(`${command}\u000D\u000A`)
+        isBusy = true
         basic.pause(wait)
     }
 
     function restEsp8266() {
-        sendAT("AT+RESTORE", 1000) // restore to factory settings
-        sendAT("AT+RST", 1000) // rest
+        sendAT("AT+RESTORE", 2000) // restore to factory settings
+        sendAT("AT+RST", 2000) // rest
         serial.readString()
-        sendAT("AT+CWMODE=1", 500) // set to STA mode
-        sendAT("AT+RST", 1000) // rest
+        sendAT("AT+CWMODE=1", 2000) // set to STA mode
     }
+
 
     /**
      * Initialize ESP8266 module
@@ -112,9 +116,9 @@ namespace ESP8266_IoT {
     //% pw.defl=your_pwd weight=95
     export function connectWifi(ssid: string, pw: string) {
         currentCmd = Cmd.ConnectWifi
-        sendAT(`AT+CWJAP="${ssid}","${pw}"`, 1000) // connect to Wifi router
         while (!wifi_connected) {
-            sendAT(`AT+CWJAP="${ssid}","${pw}"`, 1000)
+            sendAT(`AT+CWJAP="${ssid}","${pw}"`) // connect to Wifi router
+            control.waitForEvent(EspEventSource, EspEventValue.ConnectWifi)
         }
     }
 
@@ -341,7 +345,6 @@ namespace ESP8266_IoT {
         iftttkey_def = key
         iftttevent_def = event
     }
-
     /**
      * post ifttt
      */
@@ -355,12 +358,56 @@ namespace ESP8266_IoT {
         //control.waitForEvent(EspEventSource, EspEventValue.PostIFTTT)
     }
 
+
+    /*-----------------------------------cordx56---------------------------------*/
+    function sendHttp(method: "GET" | "POST", host: string, path: string, data?: string) {
+        const splitted = host.split(":")
+        let port = "80"
+        if (1 < splitted.length) {
+            port = splitted[1]
+        }
+        sendAT(`AT+CIPSTART="TCP","${host}",${port}`, 500)
+        let send = `${method} ${path}\r\nHost: ${host}`
+        if (data) {
+            send += `\r\n\r\n${data}`
+        }
+        sendAT(`AT+CIPSEND=${send.length + 2}`, 500)
+        sendAT(data, 1000)
+    }
+    /**
+     * send GET
+     */
+    //% subcategory=gPBL weight=15
+    //% blockId=sendGet block="send GET to Host %host Path %path "
+    //% host.defl=google.com
+    //% path.defl=/
+    export function sendGet(host: string, path: string): void {
+        sendHttp("GET", host, path)
+    }
+    /**
+     * get log
+     */
+    //% subcategory=gPBL weight=15
+    //% blockId=getLog block="Get log"
+    export function getLog(): string {
+        return recvString
+    }
+
+
     /**
      * on serial received data
      */
     serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function() {
         recvString += serial.readString()
         pause(1)
+
+        const busySignal = "busy p..."
+        if (recvString.includes(busySignal)) {
+            recvString.slice(busySignal.length)
+            isBusy = true
+        } else {
+            isBusy = false
+        }
 
         // received kids iot data
         if (recvString.includes("switchoff")) {

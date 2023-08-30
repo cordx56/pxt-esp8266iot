@@ -26,5 +26,9 @@
   "{id:subcategory}IFTTT": "IFTTT",
   "{id:subcategory}KidsIot": "KidsIot",
   "{id:subcategory}MQTT": "MQTT",
-  "{id:subcategory}ThingSpeak": "ThingSpeak"
+  "{id:subcategory}ThingSpeak": "ThingSpeak",
+
+  "ESP8266_IoT.sendGet|block": "Send GET",
+  "{id:subcategory}gPBL": "gPBL",
+  "ESP8266_IoT.getLog|block": "Get log"
 }

@@ -18,5 +18,7 @@
   "ESP8266_IoT.unsubMQTT": "unsubscribe",
   "ESP8266_IoT.uploadData": "upload data. It would not upload anything if it failed to connect to Wifi or ThingSpeak.",
   "ESP8266_IoT.uploadKidsiot": "upload data to kidsiot",
-  "ESP8266_IoT.wifiState": "Check if ESP8266 successfully connected to Wifi"
+  "ESP8266_IoT.wifiState": "Check if ESP8266 successfully connected to Wifi",
+  "ESP8266_IoT.sendGet": "Send GET",
+  "ESP8266_IoT.getLog|block": "Get log"
 }
