@@ -386,7 +386,7 @@ namespace ESP8266_IoT {
     //% host.defl=google.com
     //% path.defl=/
     //% expandableArgumentMode="enabled"
-    export function sendGet(host: string, path: string, f1 = 0, f2 = 0, f3 = 0, f4 = 0): void {
+    export function sendGet(host: string, path: string, f1: string | number = 0, f2: string | number = 0, f3: string | number = 0, f4: string | number = 0): void {
         const q = `?field1=${f1}&field2=${f2}&field3=${f3}&field4=${f4}`
         sendHttp("GET", host, path + q)
     }
