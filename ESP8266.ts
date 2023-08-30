@@ -362,17 +362,19 @@ namespace ESP8266_IoT {
     /*-----------------------------------cordx56---------------------------------*/
     function sendHttp(method: "GET" | "POST", host: string, path: string, data?: string) {
         const splitted = host.split(":")
+        let onlyHost = host
         let port = "80"
         if (1 < splitted.length) {
+            onlyHost = splitted[0]
             port = splitted[1]
         }
-        sendAT(`AT+CIPSTART="TCP","${host}",${port}`, 500)
-        let send = `${method} ${path}\r\nHost: ${host}`
+        sendAT(`AT+CIPSTART="TCP","${onlyHost}",${port}`, 500)
+        let send = `${method} ${path}\r\nHost: ${onlyHost}`
         if (data) {
             send += `\r\n\r\n${data}`
         }
         sendAT(`AT+CIPSEND=${send.length + 2}`, 500)
-        sendAT(data, 1000)
+        sendAT(send, 1000)
     }
     /**
      * send GET
