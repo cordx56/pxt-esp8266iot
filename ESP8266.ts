@@ -369,22 +369,26 @@ namespace ESP8266_IoT {
             port = splitted[1]
         }
         sendAT(`AT+CIPSTART="TCP","${onlyHost}",${port}`, 500)
-        let send = `${method} ${path}\r\nHost: ${onlyHost}`
+        let send = `${method} ${path} HTTP/1.1` //\r\nHost: ${onlyHost}`
         if (data) {
             send += `\r\n\r\n${data}`
         }
+        send += "\r\n"
         sendAT(`AT+CIPSEND=${send.length + 2}`, 500)
-        sendAT(send, 1000)
+        sendAT(send, 500)
+        sendAT(`AT+CIPCLOSE`, 500)
     }
     /**
      * send GET
      */
     //% subcategory=gPBL weight=15
-    //% blockId=sendGet block="send GET to Host %host Path %path "
+    //% blockId=sendGet block="send GET to Host %host Path %path||field1 %f1|field2 %f2|field3 %f3|field4 %f4"
     //% host.defl=google.com
     //% path.defl=/
-    export function sendGet(host: string, path: string): void {
-        sendHttp("GET", host, path)
+    //% expandableArgumentMode="enabled"
+    export function sendGet(host: string, path: string, f1 = 0, f2 = 0, f3 = 0, f4 = 0): void {
+        const q = `?field1=${f1}&field2=${f2}&field3=${f3}&field4=${f4}`
+        sendHttp("GET", host, path + q)
     }
     /**
      * get log
